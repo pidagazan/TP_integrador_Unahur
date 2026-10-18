@@ -88,7 +88,7 @@ def clasificar_incidentes(sesiones: list[dict])-> tuple[dict, list[dict]]:
                 'id_sesion':sesion['id_sesion'],
                 'jugador_id':sesion['jugador_id'],
                 'servidor':sesion['servidor'],
-                'motivo':f"Exceso de reportes trampa {sesion['reportes_trampa']} e intentos fallidos {sesion['intentos_fallidos']}"
+                'motivo':f"Exceso de reportes trampa ({sesion['reportes_trampa']}) e intentos fallidos ({sesion['intentos_fallidos']})"
             }
             lista_criticos.append(dic_resumido)
 
