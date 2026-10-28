@@ -1,6 +1,8 @@
 import sys
 from carga import *
 from procesamiento import *
+#FUNCIONES AUXILIARES.
+#La mayoria se explican asi misma, excepto las que estan relacionadas a los funciones1-6 del menu, donde cada indice corresponde a su numero de menu
 
 def imprimir_linea()-> None:
     print("="*75)
@@ -16,7 +18,8 @@ def imprimir_cabecera() -> None:
 def pause()-> None:
     input("Presiona una tecla...")
 
-def reporte_primer_apartado(sesiones):
+def reporte_primer_apartado(sesiones)-> None: #Funcion que imprime el primer apartado del reporte del resumen global
+                                                #NOTA IMPORTANTE -> Las funciones de reporte estan pensadas para redigirir la salida standard a un archivo por eso se usa print como método principal
     dic_globales = calcular_estadisticas_globales(sesiones) #DICCIONARIO#
     
     print("[1] RESUMEN GLOBAL OPERATIVO")
@@ -26,7 +29,7 @@ def reporte_primer_apartado(sesiones):
     print(f"Duracion media de partida : {dic_globales['duracion_promedio']}")
     print(f"Partidas de alta competencia (Ranked/Torneo): {dic_globales['porcentaje_competitivas']}")
 
-def reporte_segundo_apartado(sesiones):
+def reporte_segundo_apartado(sesiones) -> None: #Funcion que imprime el segundo apartado del reporte por servidor
     print("[2] RENDIMIENTO REGIONAL POR SERVIDOR")
     imprimir_linea_cuerpo()
     print("Servidor" + " "*20 + "| Sesiones |" + "| Ping Promedio |" + "| FPS Promedio")
@@ -36,7 +39,7 @@ def reporte_segundo_apartado(sesiones):
         elemento = rendimiento_por_servidor[key]
         print(f"{key}" + " "*20 + f"| {elemento['cantidad']} |" + f"| {elemento['ping_promedio']}ms |" + f"| {elemento['fps_promedio']}fps")
 
-def reporte_tercer_apartado(sesiones):
+def reporte_tercer_apartado(sesiones)-> None: #Funcion que imprime el tercer apartado del reporte de auditoria de seguridad e incidentes
     tupla_dict_lista_criticas = clasificar_incidentes(sesiones)
     
     sesiones_criticas = tupla_dict_lista_criticas[1]
@@ -56,7 +59,7 @@ def reporte_tercer_apartado(sesiones):
         print(registro['motivo'])
         print("")
     
-def reporte_cuarto_apartado():
+def reporte_cuarto_apartado()-> None: #Funcion qe imprime el cuatro apartado del reporte
     print("[4] CONCLUSIONES TECNICAS DEL EQUIPO")
     print("1..")
     print("2..")
@@ -72,8 +75,8 @@ def reporte_cuarto_apartado():
 
 
 
-def exportar_reporte(sesiones, ruta_salida='./reporte_gamesec.txt'):
-
+def exportar_reporte(sesiones, ruta_salida='./reporte_gamesec.txt'): # Llama a todas las funciones que imprimer los apartados del reportes y lo redirige al archivo, segun la ruta que introduzca el usuario
+#VERIFICAR RUTA DE USUARIO EN CASO DE PERSONALIZADA
     stdout_original = sys.stdout
 
     with open(ruta_salida,'w+') as sys.stdout:
@@ -89,6 +92,8 @@ def exportar_reporte(sesiones, ruta_salida='./reporte_gamesec.txt'):
 
     
     sys.stdout = stdout_original
+    print(f"Reporte creado con exito en {ruta_salida}")
+    pause()
 
     
 def verificar_csv_cargado(csv_cargado):
@@ -99,14 +104,21 @@ def verificar_csv_cargado(csv_cargado):
         resultado = False
     return resultado
 
+# Las funciones "funcion1-5" Corresponden al llamado de las funciones de menu
+# 1 -> Verifica y carga el archivo de telemetria
+# 2 -> Imprime por pantalla las estadisticas globales
+# 3 -> Imprime por pantalla las estadisticas por servidor
+# 4 -> Imprime por pantalla los registros criticos
+# 5 -> Exporta el reporte a archivo ./reporte_gamesex.txt
+# 6 -> Break que sale del loop de menu y finaliza el programa
 def funcion1()-> list[dict]:
     ruta_archivo = input("Por favor cargue la ruta de su archivo: ")
-    csv_procesado = cargar_telemetria(ruta_archivo)
+    csv_procesado = cargar_telemetria(ruta_archivo) # La misma funcion se encarga de verificar la existencia del archivo
     print("Archivo cargado de forma existosa")
     csv_cargado = True
     pause()
   
-    return csv_procesado, csv_cargado
+    return csv_procesado, csv_cargado # Retorna la tupla para que la funcion menu() pueda trabajar con el csv ya cargado, y el true, para "HABILITAR" a las otras funciones
 
 def funcion2(csv_procesado,csv_cargado)-> None:
     if not verificar_csv_cargado(csv_cargado):
@@ -181,5 +193,6 @@ def menu()-> None:
 #la ruta del archivo es ./TP_INTEGRADOR_TALLER_/gamesec_logs.csv
 #OPCIONES QUE TAN BIEN
 #1,2,3,4
-#FALTA HACER LA 5, REPORTE A ARCHIVO.
 menu()
+print("Programa terminado...")
+input(" ")

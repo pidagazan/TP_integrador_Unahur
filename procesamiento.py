@@ -1,60 +1,64 @@
 from carga import *
 
-def calcular_promedio(valor:int, cantidad:int)-> float:
+def calcular_promedio(valor:int, cantidad:int)-> float:  #Funcion auxiliar que devuelve el promedio de un valor segun una cantidad# 
     return valor/cantidad
 
-def calcular_estadisticas_globales(sesiones: list[dict]) -> dict:
-    dict_salida = {
-        'total_sesiones': 0,
+def calcular_estadisticas_globales(sesiones: list[dict]) -> dict: # Funcion que toma la lista de diccionario obtenido de la telemetria, lo procesa y
+    dict_salida = {                                                 # Devuelve un diccionario con estadisticas globales de todas las sesiones procesadas.
+        'total_sesiones': 0,                                                        #<<<<<<<<<<<<<<<<<<<<<<<< Caracteristicas devueltas.
         'ping_promedio': 0.00, #redondeada a 2 dec
         'duracion_promedio': 0.00, #redondeada a 2 dec
         'porcentaje_competitivas': 0.00 #competitiva o torneo sobre global
     }
 
-    total_sesiones = 0
+    total_sesiones = 0        # Variables locales inicializadas para llevar registro de lo recorrido, para luego definir el diccionario de salida.
     ping_promedio = 0
     duracion_promedio = 0
-    porcentaje_competitivas = 0
+    total_competitivas = 0
             
     for registro in sesiones:
         total_sesiones += 1
         ping_promedio += registro['ping_promedio']
         duracion_promedio += registro['duracion_minutos']
         if registro['tipo_partida']== "Torneo" or registro['tipo_partida']== "Competitiva":
-            porcentaje_competitivas += 1
+            total_competitivas += 1
 
     dict_salida['total_sesiones'] = total_sesiones
-    dict_salida['ping_promedio'] = {f"{ping_promedio / total_sesiones:.2f}"}
-    dict_salida['duracion_promedio'] = {f"{duracion_promedio / total_sesiones:.2f} Minutos"}
-    dict_salida['porcentaje_competitivas'] = {f"{(porcentaje_competitivas / total_sesiones)*100:.2f}% ({porcentaje_competitivas}Competitivas/{total_sesiones}Casual)"}
+    dict_salida['ping_promedio'] = {f"{calcular_promedio(ping_promedio, total_sesiones):.2f}"}
+    dict_salida['duracion_promedio'] = {f"{calcular_promedio(duracion_promedio, total_sesiones):.2f} Minutos"}
+    dict_salida['porcentaje_competitivas'] = {f"{calcular_promedio(total_competitivas, total_sesiones)*100:.2f}% ({total_competitivas} Competitivas/ {total_sesiones - total_competitivas} casual)"}
 
     return dict_salida
 
-def analizar_por_servidor(sesiones: list[dict]) -> dict:
+def analizar_por_servidor(sesiones: list[dict]) -> dict:  #Funcion que toma la lista de sesiones (.csv de telemetria) lo recorre, y analiza los datos por servidor, poblandolos dinamicamente
     dict_salida = dict()
 
-    for sesion in sesiones:
-        if sesion['servidor'] not in dict_salida.keys():
-            dict_salida[sesion['servidor']] = {'cantidad':1, 'ping_promedio':0, 'fps_promedio':0}
+    for sesion in sesiones: #Recorre la lista de sesiones
+        if sesion['servidor'] not in dict_salida.keys(): # Si el "servidor" de la sesion actual no existe en las keys del diccionario de salida, inicializa esa key en el diccionario de salida, con los valores de esa sesion
+            dict_salida[sesion['servidor']] = {'cantidad':1, 'ping_promedio': sesion['ping_promedio'], 'fps_promedio':sesion['fps_promedio']}
         else:
-            dict_salida[sesion['servidor']]['cantidad'] += 1
+            dict_salida[sesion['servidor']]['cantidad'] += 1 # Caso contrario, actualiza los valores del diccionario de salida y realiza una adicion a los acumuladores para luego promediar
             dict_salida[sesion['servidor']]['ping_promedio'] += sesion['ping_promedio']
             dict_salida[sesion['servidor']]['fps_promedio'] += sesion['fps_promedio']
     
 
 
-    for key in dict_salida.keys():
+    for key in dict_salida.keys():  # Recorrido final en el diccionario de salida para realizar los promedios finales
         servidor = dict_salida[key]
-
+        ping_acumulado = servidor.get("ping_promedio")
+        fps_acumulado = servidor.get("fps_promedio")
         cantidad_sesiones = servidor.get("cantidad")
         
-        dict_salida[key]['ping_promedio'] = f"{dict_salida[key]['ping_promedio'] / cantidad_sesiones:.2f}"
-        dict_salida[key]['fps_promedio'] = f"{dict_salida[key]['fps_promedio'] / cantidad_sesiones:.2f}"
+        dict_salida[key]['ping_promedio'] = f"{calcular_promedio(ping_acumulado,cantidad_sesiones):.2f}"
+        dict_salida[key]['fps_promedio'] = f"{calcular_promedio(fps_acumulado,cantidad_sesiones):.2f}"
 
     
     return dict_salida
 
-def reglas_seguridad(registro:dict):
+def reglas_seguridad(registro:dict): #Funcion auxiliar que se usa en clasificar_incidentes y devuelve la clasificacion final registro segun las politicas solicitadas.
+                                        # CRITICA = reportes_tramapa >= 3 && intentos_fallidos >= 4
+                                        # SOSPECHOSO = ping_promedio > 200 &&& intentos_fallidos >= 2 || reportes_trampa == 2
+                                        # NORMAL = Todos los demas casos
     clasificacion = None
     if registro['reportes_trampa'] >= 3 or registro['intentos_fallidos'] >= 4:
         clasificacion = "Critica"
@@ -65,7 +69,9 @@ def reglas_seguridad(registro:dict):
     
     return clasificacion
 
-def clasificar_incidentes(sesiones: list[dict])-> tuple[dict, list[dict]]:
+def clasificar_incidentes(sesiones: list[dict])-> tuple[dict, list[dict]]: # Funcion que devuelve una tupla = [Diccionario_contador, lista_criticos]
+                                                                            # Diccionario contador es un diccionario de las tres clasificaciones de sesion donde cada key contiene el total de esos casos
+                                                                            # Lista de criticos, es una lista de diccionario de sesiones, donde se anexan todas las sesiones que sean criticas de forma resumida.
     dict_contador = dict()
     lista_criticos = list()
 

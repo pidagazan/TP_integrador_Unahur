@@ -2,8 +2,8 @@ import os
 import csv
 import os
 
-#la ruta del archivo es ./TP_INTEGRADOR_TALLER_/gamesec_logs.csv
-def verificar_existencia_archivo(ruta_archivo:str)-> None:
+#la ruta del archivo es ./TP_INTEGRADOR_TALLER_/gamesec_logs.csv  
+def verificar_existencia_archivo(ruta_archivo:str)-> None:  #Verifica que exista el archivo a traves de un path, si existe retorna TRUE, caso contrario levanta una excepcion. #
     existe = False
     if os.path.exists(ruta_archivo):
         existe = True
@@ -14,14 +14,14 @@ def verificar_existencia_archivo(ruta_archivo:str)-> None:
 
 
 
-def verificar_contenido_lista(lista: list)-> None:
+def verificar_contenido_lista(lista: list)-> None:      #Verifica que una lista no este vacia, en caso de estarlo levanta una excepcion #
     if len(lista) == 0:
         raise ValueError("El archivo está vacío o no se cargaron de forma correcta los valores")
 
 
 
-def cargar_telemetria(ruta_archivo: str) -> list[dict]:
-    sesiones = list()
+def cargar_telemetria(ruta_archivo: str) -> list[dict]:  #Funcion que carga el .csv al programa, verificando que exista ese archivo, y anexando cada fila a la lista de diccionarios.
+    sesiones = list()                                    # El acceso a los diccionario sera a traves de los indices de la lista, ya que es una LISTA de DICCIONARIOS.
 
     verificar_existencia_archivo(ruta_archivo)
 
