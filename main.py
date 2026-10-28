@@ -120,7 +120,7 @@ def funcion1()-> list[dict]:
   
     return csv_procesado, csv_cargado # Retorna la tupla para que la funcion menu() pueda trabajar con el csv ya cargado, y el true, para "HABILITAR" a las otras funciones
 
-def funcion2(csv_procesado,csv_cargado)-> None:
+def funcion2(csv_procesado,csv_cargado)-> None: 
     if not verificar_csv_cargado(csv_cargado):
         return None
 
@@ -154,9 +154,9 @@ def funcion5(csv_procesado,csv_cargado)-> None:
     exportar_reporte(csv_procesado)
 
 
-
 def menu()-> None:
-    ingreso = None
+    opciones = ["1","2","3","4","5","6"]
+    ingreso = " "
     list_dic_principal = []
     csv_cargado = False
     while True:
@@ -168,26 +168,28 @@ def menu()-> None:
         print("5. Exportar reporte consolidades (reporte_gamesec.txt)")
         print("6. Salir")
         imprimir_linea()
-        ingreso = int(input("Seleccione una opcion: "))
-        if  not (0 < int(ingreso) <= 6):
+        
+        ingreso = (input("Seleccione una opcion: "))
+        
+        if ingreso not in opciones:
             print("Por favor ingrese una opcion válida")
             pause()
             continue
 
         match ingreso:
 
-            case 1:
+            case "1":
                list_dic_principal,csv_cargado = funcion1()
                     
-            case 2:
+            case "2":
                 funcion2(list_dic_principal,csv_cargado)
-            case 3:
+            case "3":
                 funcion3(list_dic_principal,csv_cargado)
-            case 4:
+            case "4":
                 funcion4(list_dic_principal,csv_cargado)
-            case 5:
+            case "5":
                 funcion5(list_dic_principal,csv_cargado)
-            case 6:
+            case "6":
                 break
     
 #la ruta del archivo es ./TP_INTEGRADOR_TALLER_/gamesec_logs.csv
